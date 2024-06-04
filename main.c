@@ -9,6 +9,8 @@
 #include <limits.h>
 #define PI		3.14159265358979323846
 #define VAL 60000
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 struct Vertex {
     float x, y, z;
@@ -22,7 +24,7 @@ struct TexCoord {
 struct Normal {
     float x, y, z;
 };
-
+int pineapple;
 GLfloat near = 0.01f;
 
 struct Vertex vertices[VAL];
@@ -31,7 +33,10 @@ struct Normal normals[VAL];
 int vertNum = 0, uvNum = 0, normNum = 0;
 int count[3];
 GLuint program;
+GLuint sbProgram;
 GLuint vao;
+GLuint skyboxVAO;
+unsigned int cubemapTexture;
 GLfloat dir = 1;
 GLfloat xScale = 0.1f;
 GLfloat rotAngle = 0;
@@ -39,7 +44,7 @@ GLfloat aspect = 800/600.0f;
 GLfloat * n;
 
 GLfloat eye[] = {
-    10.0f,
+    0.0f,
     0.0f,
     0.0f
 };
@@ -73,7 +78,7 @@ GLfloat scaler[] = {
     1.0f
 };
 float cAdd;
-
+//obj loader
 int loadOBJ(
     const char * filename,
     struct Vertex  *out_vertices,
@@ -156,7 +161,7 @@ void init(void) {
     // create and compile vertex shader
     const char* vertexText = readFile("vertexShader.glsl");
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    GLint size = sizeof(vertexText);
+    
     glShaderSource(vertexShader, 1, &vertexText, NULL);
     glCompileShader(vertexShader);
     GLint status;
@@ -202,9 +207,58 @@ void init(void) {
         printf(infoLog);
     }
 
+    //skybox shader
+    // create and compile vertex shader
+    const char* vertexTextsb = readFile("skyboxVS.glsl");
+    GLuint vertexShadersb = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShadersb, 1, &vertexTextsb, NULL);
+    glCompileShader(vertexShadersb);
+    GLint statussb;
+    glGetShaderiv(vertexShadersb, GL_COMPILE_STATUS, &statussb);
+    if(!statussb) {
+        printf("Error compiling vertex shader:");
+        GLchar infoLog[1024];
+        glGetShaderInfoLog(vertexShadersb, 1024, NULL, infoLog);
+        printf(infoLog);
+    }
+
+    // create and compile vertex shader
+    const char *fragmentTextsb = readFile("skyboxFS.glsl");
+    GLuint fragmentShadersb = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShadersb, 1, &fragmentTextsb, NULL);
+    glCompileShader(fragmentShadersb);
+    
+    glGetShaderiv(fragmentShadersb, GL_COMPILE_STATUS, &statussb);
+    if(!statussb) {
+        printf("Error compiling fragment shader:");
+        GLchar infoLog[1024];
+        glGetShaderInfoLog(fragmentShadersb, 1024, NULL, infoLog);
+        printf(infoLog);
+    }
+    // create and link shader program
+    sbProgram = glCreateProgram();
+    glAttachShader(sbProgram, vertexShadersb);
+    glAttachShader(sbProgram, fragmentShadersb);
+    glLinkProgram(sbProgram);
+    glGetProgramiv(sbProgram, GL_LINK_STATUS, &statussb);
+    if(!statussb) {
+        printf("Error linking program skybox:");
+        GLchar infoLog[1024];
+        glGetProgramInfoLog(sbProgram, 1024, NULL, infoLog);
+        printf(infoLog);
+    }
+    glValidateProgram(sbProgram);
+    glGetProgramiv(sbProgram, GL_VALIDATE_STATUS, &statussb);
+    if(!statussb) {
+        printf("Error linking program:");
+        GLchar infoLog[1024];
+        glGetProgramInfoLog(sbProgram, 1024, NULL, infoLog);
+        printf(infoLog);
+    }
+
 
    
-    printf("hallo");
+    
     int res = loadOBJ("spongebobs_pineapple_house.obj", vertices, uvs, normals, &vertNum, &uvNum, &normNum);
     GLfloat norms[3*normNum];
     int count = 0;
@@ -234,7 +288,22 @@ void init(void) {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
     
+
+    // create texture object
+    /*glGenTextures(1,&pineapple);
+    glBindTexture(GL_TEXTURE_2D, pineapple);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    int width, height, channels;
+    unsigned char *data = stbi_load("", &width, &height, &channels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D,0);
+    stbi_image_free(data);*/
+
     glVertexAttribPointer(
         0, 
         3,
@@ -257,8 +326,91 @@ void init(void) {
     glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    //skybox
+
+    GLfloat skyBoxVertices[] = {
+
+        -1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
+        1.0f, -1.0f, 1.0f,  1.0f, 0.0f,
+        1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+        -1.0f, -1.0f, 1.0f, 0.0f,0.0f,
+        -1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+        1.0f, 1.0f, -1.0f,  0.0f, 1.0f,
+        -1.0f, 1.0f, -1.0f,  1.0f, 1.0f
+    };
+
+    unsigned int skyBoxIndices[] = {
+        //right
+        1,2,6,
+        6,5,1,
+        //left
+        0,4,7,
+        7,3,0,
+        //top
+        4,5,6,
+        6,7,4,
+        //bottom
+        0,3,2,
+        2,1,0,
+        //back
+        0,1,5,
+        5,4,0,
+        //front
+        3,7,6,
+        6,2,3
+    };
+    unsigned int skyboxVBO, skyboxEBO;
+    glGenVertexArrays(1, &skyboxVAO);
+    glGenBuffers(1, &skyboxVBO);
+    glGenBuffers(1,  &skyboxEBO);
+    glBindVertexArray(skyboxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyBoxVertices), skyBoxVertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skyBoxIndices), skyBoxIndices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5* sizeof(float), (void*)0);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5* sizeof(float), (GLvoid*) (3*sizeof(GLfloat)));
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    
+    glGenTextures(1, &cubemapTexture);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    for (int i = 0; i < 6; i++) {
+        int width, height, channels;
+        unsigned char* data = stbi_load("sky.png", &width, &height, &channels, 0);
+        if(data) {
+            stbi_set_flip_vertically_on_load(1);
+            glTexImage2D(
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0,
+                GL_RGBA,
+                width,
+                height,
+                0,
+                GL_RGBA,
+                GL_UNSIGNED_BYTE,
+                data
+            );
+            stbi_image_free(data);
+        } else {
+            perror("fehler beim laden vom bild");
+            stbi_image_free(data);
+        }
+
+    }
     
     
+
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glViewport(0, 0, 800, 600);
    
@@ -493,13 +645,31 @@ void perspective(GLfloat* out, GLfloat fovy, GLfloat aspect, GLfloat near, GLflo
 
 void draw(void) {
     glClear(GL_COLOR_BUFFER_BIT);
-    glUseProgram(program);
-    
     GLfloat transMat[16];
     GLfloat viewMat[16];
     GLfloat projMat[16];
     identity(transMat);
     identity(viewMat);
+    lookAt(viewMat, eye, look, up);
+    perspective(projMat,90, aspect, 0.1f, 1000.0f); 
+    //draw skybox
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_FALSE);
+    glUseProgram(sbProgram);
+    //glUniformMatrix4fv(glGetUniformLocation(sbProgram, "view"),1, GL_FALSE,viewMat);
+    //glUniformMatrix4fv(glGetUniformLocation(sbProgram, "projection"),1, GL_FALSE,projMat);
+    glBindVertexArray(skyboxVAO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+    GLuint sbLoc = glGetUniformLocation(sbProgram, "skybox");
+    glUniform1i(sbLoc,0);
+    glDrawElements(GL_TRIANGLES,36, GL_UNSIGNED_INT,0);
+    glBindVertexArray(0);
+    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LESS);
+
+    glUseProgram(program);
+    
     //identity(projMat);
     // reihenfolge scale -> rotate -> translate !!!!!
     
@@ -509,12 +679,13 @@ void draw(void) {
     //rotatey(transMat,transMat,rotAngle);
     //rotatey(viewMat, viewMat, rotAngle);
     //translate(transMat,transMat,testvektor);  
-    lookAt(viewMat, eye, look, up);
-    
-    perspective(projMat,90, aspect, 0.1f, 1000.0f); 
     
     
-    
+    float x = eye[0];
+    float y = eye[1];
+    float z = eye[2];
+    GLint cameraLocation = glGetUniformLocation(program, "camera");
+    glUniform3f(cameraLocation,x,y,z);
     GLint colorLocation = glGetUniformLocation(program, "color");
     glUniform3f(colorLocation, 1.0f, 0.24f, 0.02f);
     GLint ModelLoc = glGetUniformLocation(program, "model");
@@ -530,7 +701,7 @@ void draw(void) {
     glUniform3f(maLocation, 1.0f, 0.5f, 0.31f);
     glUniform3f(mdLocation, 1.0f, 0.5f, 0.31f);
     glUniform3f(msLocation, 0.5f, 0.5f, 0.5f);
-    glUniform1f(mshineLocation, 32.0f);
+    glUniform1f(mshineLocation, 64.0f);
     GLint laLocation = glGetUniformLocation(program, "light.ambient");
     GLint ldLocation = glGetUniformLocation(program, "light.diffuse");
     GLint lsLocation = glGetUniformLocation(program, "light.specular");
@@ -590,6 +761,19 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         eye[1] = eye[1] +0.5f;
     else if (key == GLFW_KEY_Z && action == GLFW_REPEAT)
         eye[1] = eye[1] -0.5f;
+
+    else if (key == GLFW_KEY_U && action == GLFW_REPEAT)
+        look[0] = look[0] -0.5f;
+    else if (key == GLFW_KEY_J && action == GLFW_REPEAT)
+        look[0] = look[0] +0.5f;
+    else if (key == GLFW_KEY_H && action == GLFW_REPEAT)
+        look[2] = look[2] +0.5f;
+    else if (key == GLFW_KEY_K && action == GLFW_REPEAT)
+        look[2] = look[2] -0.5f;
+    else if (key == GLFW_KEY_O && action == GLFW_REPEAT)
+        look[1] = look[1] +0.5f;
+    else if (key == GLFW_KEY_P && action == GLFW_REPEAT)
+        look[1] = look[1] -0.5f;    
 }
 int main(void)
 {

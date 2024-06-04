@@ -8,7 +8,7 @@
 
 
 char* readFile(char* filename) {
-    /*FILE *f = fopen(filename, "rb");
+    FILE *f = fopen(filename, "rb");
     fseek(f, 0, SEEK_END);
     long fsize = ftell(f);
     fseek(f, 0, SEEK_SET); 
@@ -18,8 +18,8 @@ char* readFile(char* filename) {
     fclose(f);
 
     string[fsize] = 0;
-    return string;*/
-    char * buffer = 0;
+    return string;
+    /*char * buffer = 0;
     long length;
     FILE * f = fopen (filename, "rb");
 
@@ -36,7 +36,7 @@ char* readFile(char* filename) {
         fclose (f);
     }
 
-    return buffer;
+    return buffer;*/
 }
 
 int readLine() {
