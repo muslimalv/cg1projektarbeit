@@ -31,11 +31,15 @@ struct Vertex vertices[VAL];
 struct TexCoord uvs[VAL];
 struct Normal normals[VAL];
 int vertNum = 0, uvNum = 0, normNum = 0;
-int count[3];
+struct Vertex Patrick_vertices[VAL];
+struct TexCoord Patrick_uvs[VAL];
+struct Normal Patrick_normals[VAL];
+int Patrick_vertNum = 0, Patrick_uvNum = 0, Patrick_normNum = 0;
+
 GLuint program;
 GLuint sbProgram;
 GLuint vao;
-GLuint skyboxVAO;
+GLuint skyboxVAO , PatrickVAO;
 unsigned int cubemapTexture;
 GLfloat dir = 1;
 GLfloat xScale = 0.1f;
@@ -45,8 +49,8 @@ GLfloat * n;
 
 GLfloat eye[] = {
     0.0f,
-    0.0f,
-    0.0f
+    5.0f,
+    10.0f
 };
 GLfloat up[] = {
     0.0f,
@@ -91,7 +95,7 @@ int loadOBJ(
     struct TexCoord temp_uvs[VAL];
     struct Normal temp_normals[VAL];
     int vCount = 0, nCount = 0, uvCount = 0;
-    int Vtemp = 0, uvtemp =0, Ntemp =0;
+    int temp_Vertex_Index = 0, temp_uv_Index =0, temp_Normal_Index =0;
     FILE * file = fopen(filename, "r");
     if( file == NULL ){
         printf("Impossible to open the file !\n");
@@ -107,18 +111,18 @@ int loadOBJ(
         if ( strcmp( lineHeader, "vn" ) == 0 ){
             struct Normal normal;
             fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z );
-            temp_normals[Ntemp] = normal;
-            Ntemp ++;
+            temp_normals[temp_Normal_Index] = normal;
+            temp_Normal_Index ++;
         }else if ( strcmp( lineHeader, "vt" ) == 0 ){
             struct TexCoord uv;
             fscanf(file, "%f %f\n", &uv.u, &uv.v );
-            temp_uvs[uvtemp] = uv;
-            uvtemp ++;
+            temp_uvs[temp_uv_Index] = uv;
+            temp_uv_Index ++;
         }else if(strcmp(lineHeader, "v") == 0) {
             struct Vertex vertex;
             fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z );
-            temp_vertices[Vtemp] = vertex;
-            Vtemp ++;
+            temp_vertices[temp_Vertex_Index] = vertex;
+            temp_Vertex_Index ++;
         } else if ( strcmp( lineHeader, "f" ) == 0 ){
             //std::string vertex1, vertex2, vertex3;
             unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
@@ -262,14 +266,6 @@ void init(void) {
     int res = loadOBJ("spongebobs_pineapple_house.obj", vertices, uvs, normals, &vertNum, &uvNum, &normNum);
     GLfloat norms[3*normNum];
     int count = 0;
-    /*for (struct Normal n : normals)
-    {
-        norms[count] = n.x;
-        norms[count+1] = n.y;
-        norms[count+2] = n.z;
-        count = count +3;
-    }
-    n = norms;*/
     
     GLuint vbo;
     glGenBuffers(1, &vbo);
@@ -326,6 +322,30 @@ void init(void) {
     glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+    //patrick TODO1111
+
+    /*int res = loadOBJ("patrick_star_spongebob.obj", vertices, uvs, normals, &vertNum, &uvNum, &normNum);
+    GLfloat norms[3*normNum];
+    int count = 0;
+    
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertNum * sizeof(struct Vertex), vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    
+    
+    GLuint norm;
+    glGenBuffers(1, &norm);
+    glBindBuffer(GL_ARRAY_BUFFER, norm);
+    glBufferData(GL_ARRAY_BUFFER,   normNum * sizeof(struct Normal), normals, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // create vertex array object
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);*/
+
 
     //skybox
 
