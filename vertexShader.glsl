@@ -20,6 +20,6 @@ void main() {
     fragPosition = vec3(model * vec4(aPosition,1.0));
     Normal = inverse(transpose(mat3(model))) * normals;
     vertexColor = aColor;
-    gl_Position =  projection * view * model*vec4(aPosition, 1.0);
+    gl_Position =   projection *view * model*vec4(aPosition, 1.0);
     tex = texCoord;
 }

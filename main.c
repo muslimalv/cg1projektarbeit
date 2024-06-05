@@ -56,7 +56,7 @@ GLfloat * n;
 
 GLfloat eye[] = {
     0.0f,
-    5.0f,
+    3.0f,
     10.0f
 };
 GLfloat up[] = {
@@ -78,9 +78,9 @@ GLfloat input[] = {
     1.0f
 };
 GLfloat testvektor[] = {
+    5.0f,
     0.0f,
-    0.0f,
-    0.0f
+    5.0f
     
 };
 GLfloat scaler[] = {
@@ -500,37 +500,30 @@ void identity(GLfloat* out) {
 }
 
 void translate(GLfloat* out, GLfloat* in, GLfloat* v) {
-    /*GLfloat T[] = {
-        1.0f, 0.0f, 0.0f, v[0],
-        0.0f, 1.0f, 0.0f, v[1],
-        0.0f, 0.0f, 1.0f, v[2],
-        0.0f, 0.0f, 0.0f, 1.0f
-    };*/
+   
     GLfloat T[] = {
         1.0f,0.0f,0.0f,0.0f,
         0.0f,1.0f,0.0f,0.0f,
         0.0f,0.0f,1.0f,0.0f,
         v[0],v[1],v[2],1.0f
     };
-    /*for (int i = 0; i < 4; i++) {
-        for ( int j = 0; j < 4; j++) {
-            out[j + i * 4] = 0;
-
-            for (int k = 0; k < 4; k++) {
-                out[j + i * 4] += in[k + i * 4] * T[j + k * 4];
-            }
-        }
-    }*/
+    float result[16];
     for (int i = 0; i < 4; i++)
     {
         for (int j = 0; j < 4; j++)
         {
              //out[i*4+j] = T[i*4] * in[j*4] +  T[i*4+1] * in[j*4+1] + T[i*4+2] * in[j*4+2] + T[i*4+3] * in[j*4+3];
-            out[i*4+j] = T[i*4] * in[j*4] +  T[i*4+1] * in[j*4+1] + T[i*4+2] * in[j*4+2] + T[i*4+3] * in[j*4+3];
+            result[i*4+j] = T[i*4] * in[j*4] +  T[i*4+1] * in[j*4+1] + T[i*4+2] * in[j*4+2] + T[i*4+3] * in[j*4+3];
              
-        }
-        
-        //out[i] = T[i*4] * in[0] +  T[i*4+1] * in[1] + T[i*4+2] * in[2] + T[i*4+3] * in[3];
+        }  
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            out[i*4+j] = result[i*4+j];
+             
+        }  
     }
 }
 
@@ -541,86 +534,103 @@ void scale(GLfloat* out, GLfloat* in, GLfloat* v) {
         0.0f, 0.0f, v[2], 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f
     };
+    float result[16];
     for (int i = 0; i < 4; i++)
     {
         for (int j = 0; j < 4; j++)
         {
-            out[i*4+j] =S[i*4] * in[j*4] +  S[i*4+1] * in[j*4+1] + S[i*4+2] * in[j*4+2] + S[i*4+3] * in[j*4+3];
+            result[i*4+j] =S[i*4] * in[j*4] +  S[i*4+1] * in[j*4+1] + S[i*4+2] * in[j*4+2] + S[i*4+3] * in[j*4+3];
         }
         
         //out[i] = S[i*4] * in[0] +  S[i*4+1] * in[1] + S[i*4+2] * in[2] + S[i*4+3] * in[3];
-        
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            out[i*4+j] = result[i*4+j];
+             
+        }  
     }
 }
 void rotatez(GLfloat* out, GLfloat* in, GLfloat angle) {
-    /*GLfloat R[] = {
-        cos(angle), -sin(angle), 0.0f, 0.0f,
-        sin(angle), cos(angle), 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f
-    };*/
+   
     GLfloat R[] = {
         cos(angle), sin(angle), 0.0f, 0.0f,
         -sin(angle), cos(angle), 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f
     };
+    float result[16];
     for (int i = 0; i < 4; i++)
     {
         for (int j = 0; j < 4; j++)
         {
-             out[i*4+j] = R[i*4] * in[j*4] +  R[i*4+1] * in[j*4+1] + R[i*4+2] * in[j*4+2] + R[i*4+3] * in[j*4+3];
+             result[i*4+j] = R[i*4] * in[j*4] +  R[i*4+1] * in[j*4+1] + R[i*4+2] * in[j*4+2] + R[i*4+3] * in[j*4+3];
         }
-        //out[i] = R[i*4] * in[0] +  R[i*4+1] * in[1] + R[i*4+2] * in[2] + R[i*4+3] * in[3];
-        
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            out[i*4+j] = result[i*4+j];
+             
+        }  
     }
 }
 
 void rotatex(GLfloat* out, GLfloat* in, GLfloat angle) {
-    /*GLfloat R[] = {
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, cos(angle), -sin(angle), 0.0f,
-        0.0f, sin(angle), cos(angle), 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f
-    };*/
+   
     GLfloat R[] = {
         1.0f, 0.0f, 0.0f, 0.0f,
         0.0f, cos(angle), sin(angle), 0.0f,
         0.0f, -sin(angle), cos(angle), 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f
     };
+    float result[16];
     for (int i = 0; i < 4; i++)
     {
         for (int j = 0; j < 4; j++)
         {
-             out[i*4+j] = R[i*4] * in[j*4] +  R[i*4+1] * in[j*4+1] + R[i*4+2] * in[j*4+2] + R[i*4+3] * in[j*4+3];
+             result[i*4+j] = R[i*4] * in[j*4] +  R[i*4+1] * in[j*4+1] + R[i*4+2] * in[j*4+2] + R[i*4+3] * in[j*4+3];
         }
         //out[i] = R[i*4] * in[0] +  R[i*4+1] * in[1] + R[i*4+2] * in[2] + R[i*4+3] * in[3];
         
     }
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            out[i*4+j] = result[i*4+j];
+             
+        }  
+    }
 }
 
 void rotatey(GLfloat* out, GLfloat* in, GLfloat angle) {
-    /*GLfloat R[] = {
-        cos(angle), 0.0f, sin(angle), 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        -sin(angle), 0.0f, cos(angle), 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f
-    };*/
+ 
     GLfloat R[] = {
         cos(angle), 0.0f, -sin(angle), 0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
         sin(angle), 0.0f, cos(angle), 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f
     };
+    float result[16];
     for (int i = 0; i < 4; i++)
     {
         for (int j = 0; j < 4; j++)
         {
-             out[i*4+j] = R[i*4] * in[j*4] +  R[i*4+1] * in[j*4+1] + R[i*4+2] * in[j*4+2] + R[i*4+3] * in[j*4+3];
+            result[i*4+j] = R[i*4] * in[j*4] +  R[i*4+1] * in[j*4+1] + R[i*4+2] * in[j*4+2] + R[i*4+3] * in[j*4+3];
         }
         //out[i] = R[i*4] * in[0] +  R[i*4+1] * in[1] + R[i*4+2] * in[2] + R[i*4+3] * in[3];
-        
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            out[i*4+j] = result[i*4+j];
+             
+        }  
     }
 }
 
@@ -788,7 +798,8 @@ void draw(void) {
     identity(patrick_transMat);
     identity(patrick_viewMat);
     lookAt(patrick_viewMat, eye, look, up);
-    perspective(patrick_projMat,50, aspect, 0.1f, 1000.0f);
+    perspective(patrick_projMat,90, aspect, 0.1f, 1000.0f);
+    rotatey(patrick_transMat, patrick_transMat, rotAngle);
     translate(patrick_transMat,patrick_transMat,testvektor); 
     GLint patrick_cameraLocation = glGetUniformLocation(patrick_program, "camera");
     glUniform3f(patrick_cameraLocation,x,y,z);
@@ -818,13 +829,14 @@ void draw(void) {
     glBindVertexArray(patrickVAO);
     glClear(GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
-    
+    //glCullFace(GL_CULL_FACE);
     glDrawArrays(GL_TRIANGLES, 0,patrick_vertNum);
      
     //glScalef(50.0f,50.0f,50.0f);
     //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     
-    
+    //testvektor[0] = testvektor[0] + 0.001;
+    //printf("%f\n", testvektor[0]);
     if(rotAngle < 360) {
         rotAngle += 0.01f;
         
