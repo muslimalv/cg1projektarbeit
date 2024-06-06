@@ -1,7 +1,7 @@
 #include "OBJLoader.h"
 #include <stdio.h>
 #include <string.h>
-#define VAL 60000
+#define VAL 100000
 
 int loadOBJ(
     const char * filename,

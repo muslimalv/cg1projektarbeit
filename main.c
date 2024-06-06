@@ -9,8 +9,8 @@
 #include <limits.h>
 #include "OBJLoader.h"
 #include "baseFuncs.h"
-#define PI		3.14159265358979323846
-#define VAL 60000
+
+#define VAL 100000
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -177,7 +177,7 @@ void init(void) {
     //spongebob program
     spongebob_program = glCreateProgram();
     glAttachShader(spongebob_program, vertexShader);
-    glAttachShader(spongebob_program, fragmentShader);
+    glAttachShader(spongebob_program, patrick_fragmentShader);
     glLinkProgram(spongebob_program);
     glGetProgramiv(spongebob_program, GL_LINK_STATUS, &status);
     if(!status) {
@@ -422,20 +422,20 @@ void init(void) {
 
     //spongebobtexutre
     
-    /*glGenTextures(1,&patrick);
-    glBindTexture(GL_TEXTURE_2D, patrick);
+    glGenTextures(1,&spongebob);
+    glBindTexture(GL_TEXTURE_2D, spongebob);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    int patrick_width, patrick_height, patrick_channels;
-    unsigned char *data = stbi_load("patrick_d.png", &patrick_width, &patrick_height, &patrick_channels,0);
+    int spongebob_width, spongebob_height, spongebob_channels;
+    data = stbi_load("spongebob.png", &spongebob_width, &spongebob_height, &spongebob_channels,0);
     glTexImage2D(
                 GL_TEXTURE_2D,
                 0,
                 GL_RGB,
-                patrick_width,
-                patrick_height,
+                spongebob_width,
+                spongebob_height,
                 0,
                 GL_RGB,
                 GL_UNSIGNED_BYTE,
@@ -443,7 +443,7 @@ void init(void) {
             );
     glGenerateMipmap(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D,0);
-    stbi_image_free(data);*/
+    stbi_image_free(data);
 
     // create vertex array object
     glGenVertexArrays(1, &spongebobVAO);
@@ -682,7 +682,7 @@ void draw(void) {
     identity(spongebob_transMat);
     identity(spongebob_viewMat);
     lookAt(spongebob_viewMat, eye, look, up);
-    perspective(spongebob_projMat,90, aspect, 0.1f, 1000.0f);
+    perspective(spongebob_projMat,90, aspect, 0.001f, 1000.0f);
     rotatex(spongebob_transMat, spongebob_transMat, 4.5);
     translate(spongebob_transMat,spongebob_transMat,spongebob_translate); 
     GLint spongebob_cameraLocation = glGetUniformLocation(spongebob_program, "camera");
@@ -711,10 +711,10 @@ void draw(void) {
     glUniform3f(spongebob_ldLocation, 0.2f,0.0f,0.0f);
     glUniform3f(spongebob_lsLocation, 1.0f,1.0f,1.0f);
 
-    /*glActiveTexture(GL_TEXTURE12);
-    glBindTexture(GL_TEXTURE_2D, patrick);
-    GLuint patrick_Loc = glGetUniformLocation(patrick_program, "ourTexture");
-    glUniform1i(patrick_Loc,12);*/
+    glActiveTexture(GL_TEXTURE13);
+    glBindTexture(GL_TEXTURE_2D, spongebob);
+    GLuint spongebob_Loc = glGetUniformLocation(spongebob_program, "ourTexture");
+    glUniform1i(spongebob_Loc,13);
     glBindVertexArray(spongebobVAO);
 
     glClear(GL_DEPTH_BUFFER_BIT);

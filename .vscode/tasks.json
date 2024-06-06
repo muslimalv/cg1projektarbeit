@@ -9,7 +9,19 @@
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${fileDirname}/${fileBasenameNoExtension}",
+                "${fileDirname}/StringReader.c",
+                "${fileDirname}/OBJLoader.c",
+                "${fileDirname}/baseFuncs.c",
+                "-L",
+                "/usr/lib64",
+                "-lGLEW",
+                "-lGL",
+                "-lX11",
+                "-lGLU",
+                "-lglfw",
+                "-lm"
+
             ],
             "options": {
                 "cwd": "${fileDirname}"

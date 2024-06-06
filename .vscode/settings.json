@@ -1,8 +1,11 @@
 {
     "files.associations": {
-        "errno.h": "c",
         "stdio.h": "c",
-        "stringreader.h": "c",
-        "basefuncs.h": "c"
-    }
+        "deque": "c",
+        "string": "c",
+        "vector": "c",
+        "glew.h": "c",
+        "stringreader.h": "c"
+    },
+    "cmake.sourceDirectory": "/home/muslimaliev/CG1/glfw-3.4"
 }
