@@ -13,7 +13,7 @@
 #define VAL 60000
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-int pineapple;
+
 GLfloat near = 0.01f;
 
 struct Vertex vertices[VAL];
@@ -35,6 +35,7 @@ GLfloat patrick_projMat[16];
 GLuint program, patrick_program;
 GLuint sbProgram;
 GLuint vao;
+GLuint pineapple, patrick;
 GLuint skyboxVAO , patrickVAO;
 unsigned int cubemapTexture;
 GLfloat dir = 1;
@@ -129,9 +130,21 @@ void init(void) {
         printf("%s",infoLog);
     }
     //patrick program
+    const char *patrick_fragmentText = readFile("patrickFS.glsl");
+    GLuint patrick_fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(patrick_fragmentShader, 1, &patrick_fragmentText, NULL);
+    glCompileShader(patrick_fragmentShader);
+    
+    glGetShaderiv(patrick_fragmentShader, GL_COMPILE_STATUS, &status);
+    if(!status) {
+        printf("Error compiling fragment shader:");
+        GLchar infoLog[1024];
+        glGetShaderInfoLog(patrick_fragmentShader, 1024, NULL, infoLog);
+        printf("%s",infoLog);
+    }
     patrick_program = glCreateProgram();
     glAttachShader(patrick_program, vertexShader);
-    glAttachShader(patrick_program, fragmentShader);
+    glAttachShader(patrick_program, patrick_fragmentShader);
     glLinkProgram(patrick_program);
     glGetProgramiv(patrick_program, GL_LINK_STATUS, &status);
     if(!status) {
@@ -262,8 +275,8 @@ void init(void) {
     glBindVertexArray(0);
     //patrick TODO1111
 
-    int patrick = loadOBJ("patrick.obj", patrick_vertices, patrick_uvs, patrick_normals, &patrick_vertNum, &patrick_uvNum, &patrick_normNum);
-    if(patrick !=0)
+    int patrick_Model = loadOBJ("patrick.obj", patrick_vertices, patrick_uvs, patrick_normals, &patrick_vertNum, &patrick_uvNum, &patrick_normNum);
+    if(patrick_Model !=0)
         perror("failed to load patrick");
     
     
@@ -279,6 +292,37 @@ void init(void) {
     glBindBuffer(GL_ARRAY_BUFFER, patrickNormals);
     glBufferData(GL_ARRAY_BUFFER,   patrick_normNum * sizeof(struct Normal), patrick_normals, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    GLuint patrickuv;
+    glGenBuffers(1, &patrickuv);
+    glBindBuffer(GL_ARRAY_BUFFER, patrickuv);
+    glBufferData(GL_ARRAY_BUFFER,   patrick_uvNum * sizeof(struct TexCoord), patrick_uvs, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //patrick texutre
+    
+    glGenTextures(1,&patrick);
+    glBindTexture(GL_TEXTURE_2D, patrick);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    int patrick_width, patrick_height, patrick_channels;
+    unsigned char *data = stbi_load("patrick_d.png", &patrick_width, &patrick_height, &patrick_channels,0);
+    glTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                GL_RGB,
+                patrick_width,
+                patrick_height,
+                0,
+                GL_RGB,
+                GL_UNSIGNED_BYTE,
+                data
+            );
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D,0);
+    stbi_image_free(data);
 
     // create vertex array object
     glGenVertexArrays(1, &patrickVAO);
@@ -304,6 +348,17 @@ void init(void) {
         0
     );
     glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, patrickuv);
+    glVertexAttribPointer(
+        2, 
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        0,
+        0
+    );
+    glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
@@ -461,7 +516,7 @@ void draw(void) {
     identity(patrick_viewMat);
     lookAt(patrick_viewMat, eye, look, up);
     perspective(patrick_projMat,90, aspect, 0.1f, 1000.0f);
-    rotatey(patrick_transMat, patrick_transMat, rotAngle);
+    //rotatey(patrick_transMat, patrick_transMat, rotAngle);
     translate(patrick_transMat,patrick_transMat,testvektor); 
     GLint patrick_cameraLocation = glGetUniformLocation(patrick_program, "camera");
     glUniform3f(patrick_cameraLocation,x,y,z);
@@ -477,9 +532,9 @@ void draw(void) {
     GLint patrick_mdLocation = glGetUniformLocation(patrick_program, "material.diffuse");
     GLint patrick_msLocation = glGetUniformLocation(patrick_program, "material.specular");
     GLint patrick_mshineLocation = glGetUniformLocation(patrick_program, "material.shininess");
-    glUniform3f(patrick_maLocation, 1.0f, 0.5f, 0.31f);
-    glUniform3f(patrick_mdLocation, 1.0f, 0.5f, 0.31f);
-    glUniform3f(patrick_msLocation, 0.5f, 0.5f, 0.5f);
+    glUniform3f(patrick_maLocation, 0.2f, 0.2f, 0.2f);
+    glUniform3f(patrick_mdLocation, 0.8f, 0.8f, 0.8f);
+    glUniform3f(patrick_msLocation, 0.0f, 0.0f, 0.0f);
     glUniform1f(patrick_mshineLocation, 64.0f);
     GLint patrick_laLocation = glGetUniformLocation(patrick_program, "light.ambient");
     GLint patrick_ldLocation = glGetUniformLocation(patrick_program, "light.diffuse");
@@ -488,7 +543,13 @@ void draw(void) {
     glUniform3f(patrick_laLocation, 0.5f,0.0f,0.0f);
     glUniform3f(patrick_ldLocation, 0.2f,0.0f,0.0f);
     glUniform3f(patrick_lsLocation, 1.0f,1.0f,1.0f);
+
+    glActiveTexture(GL_TEXTURE12);
+    glBindTexture(GL_TEXTURE_2D, patrick);
+    GLuint patrick_Loc = glGetUniformLocation(patrick_program, "ourTexture");
+    glUniform1i(patrick_Loc,12);
     glBindVertexArray(patrickVAO);
+
     glClear(GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     //glCullFace(GL_CULL_FACE);
