@@ -24,6 +24,10 @@ struct Vertex patrick_vertices[VAL];
 struct TexCoord patrick_uvs[VAL];
 struct Normal patrick_normals[VAL];
 int patrick_vertNum = 0, patrick_uvNum = 0, patrick_normNum = 0;
+struct Vertex spongebob_vertices[VAL];
+struct TexCoord spongebob_uvs[VAL];
+struct Normal spongebob_normals[VAL];
+int spongebob_vertNum = 0, spongebob_uvNum = 0, spongebob_normNum = 0;
 
 
 GLfloat transMat[16];
@@ -32,11 +36,14 @@ GLfloat projMat[16];
 GLfloat patrick_transMat[16];
 GLfloat patrick_viewMat[16];
 GLfloat patrick_projMat[16];
-GLuint program, patrick_program;
+GLfloat spongebob_transMat[16];
+GLfloat spongebob_viewMat[16];
+GLfloat spongebob_projMat[16];
+GLuint program, patrick_program, spongebob_program;
 GLuint sbProgram;
 GLuint vao;
-GLuint pineapple, patrick;
-GLuint skyboxVAO , patrickVAO;
+GLuint pineapple, patrick, spongebob;
+GLuint skyboxVAO , patrickVAO, spongebobVAO;
 unsigned int cubemapTexture;
 GLfloat dir = 1;
 GLfloat xScale = 0.1f;
@@ -67,10 +74,16 @@ GLfloat input[] = {
     1.0f,
     1.0f
 };
-GLfloat testvektor[] = {
+GLfloat patrick_translate[] = {
     5.0f,
     0.0f,
     5.0f
+    
+};
+GLfloat spongebob_translate[] = {
+    8.0f,
+    -2.0f,
+    2.0f
     
 };
 GLfloat scaler[] = {
@@ -159,6 +172,26 @@ void init(void) {
         printf("Error linking patrick program:");
         GLchar infoLog[1024];
         glGetProgramInfoLog(patrick_program, 1024, NULL, infoLog);
+        printf("%s",infoLog);
+    }
+    //spongebob program
+    spongebob_program = glCreateProgram();
+    glAttachShader(spongebob_program, vertexShader);
+    glAttachShader(spongebob_program, fragmentShader);
+    glLinkProgram(spongebob_program);
+    glGetProgramiv(spongebob_program, GL_LINK_STATUS, &status);
+    if(!status) {
+        printf("Error linking patrick program:");
+        GLchar infoLog[1024];
+        glGetProgramInfoLog(spongebob_program, 1024, NULL, infoLog);
+        printf("%s",infoLog);
+    }
+    glValidateProgram(spongebob_program);
+    glGetProgramiv(spongebob_program, GL_VALIDATE_STATUS, &status);
+    if(!status) {
+        printf("Error linking patrick program:");
+        GLchar infoLog[1024];
+        glGetProgramInfoLog(spongebob_program, 1024, NULL, infoLog);
         printf("%s",infoLog);
     }
 
@@ -273,7 +306,7 @@ void init(void) {
     glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-    //patrick TODO1111
+    //patrick 
 
     int patrick_Model = loadOBJ("patrick.obj", patrick_vertices, patrick_uvs, patrick_normals, &patrick_vertNum, &patrick_uvNum, &patrick_normNum);
     if(patrick_Model !=0)
@@ -350,6 +383,94 @@ void init(void) {
     glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, patrickuv);
+    glVertexAttribPointer(
+        2, 
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        0,
+        0
+    );
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    //Spongebob
+    int spongebob_Model = loadOBJ("spongebob_squarepants.obj", spongebob_vertices, spongebob_uvs, spongebob_normals, &spongebob_vertNum, &spongebob_uvNum, &spongebob_normNum);
+    if(spongebob_Model !=0)
+        perror("failed to load spongebob");
+    
+    
+    GLuint spongebobVBO;
+    glGenBuffers(1, &spongebobVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, spongebobVBO);
+    glBufferData(GL_ARRAY_BUFFER, spongebob_vertNum * sizeof(struct Vertex), spongebob_vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    
+    
+    GLuint spongebobNormals;
+    glGenBuffers(1, &spongebobNormals);
+    glBindBuffer(GL_ARRAY_BUFFER, spongebobNormals);
+    glBufferData(GL_ARRAY_BUFFER,   spongebob_normNum * sizeof(struct Normal), spongebob_normals, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    GLuint spongebobuv;
+    glGenBuffers(1, &spongebobuv);
+    glBindBuffer(GL_ARRAY_BUFFER, spongebobuv);
+    glBufferData(GL_ARRAY_BUFFER,   spongebob_uvNum * sizeof(struct TexCoord), spongebob_uvs, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //spongebobtexutre
+    
+    /*glGenTextures(1,&patrick);
+    glBindTexture(GL_TEXTURE_2D, patrick);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    int patrick_width, patrick_height, patrick_channels;
+    unsigned char *data = stbi_load("patrick_d.png", &patrick_width, &patrick_height, &patrick_channels,0);
+    glTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                GL_RGB,
+                patrick_width,
+                patrick_height,
+                0,
+                GL_RGB,
+                GL_UNSIGNED_BYTE,
+                data
+            );
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D,0);
+    stbi_image_free(data);*/
+
+    // create vertex array object
+    glGenVertexArrays(1, &spongebobVAO);
+    glBindVertexArray(spongebobVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, spongebobVBO);
+    glVertexAttribPointer(
+        0, 
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        0,
+        0
+    );
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, spongebobNormals);
+    glVertexAttribPointer(
+        1, 
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        0,
+        0
+    );
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, spongebobuv);
     glVertexAttribPointer(
         2, 
         2,
@@ -517,7 +638,7 @@ void draw(void) {
     lookAt(patrick_viewMat, eye, look, up);
     perspective(patrick_projMat,90, aspect, 0.1f, 1000.0f);
     //rotatey(patrick_transMat, patrick_transMat, rotAngle);
-    translate(patrick_transMat,patrick_transMat,testvektor); 
+    translate(patrick_transMat,patrick_transMat,patrick_translate); 
     GLint patrick_cameraLocation = glGetUniformLocation(patrick_program, "camera");
     glUniform3f(patrick_cameraLocation,x,y,z);
     GLint patrick_colorLocation = glGetUniformLocation(patrick_program, "color");
@@ -554,14 +675,54 @@ void draw(void) {
     glEnable(GL_DEPTH_TEST);
     //glCullFace(GL_CULL_FACE);
     glDrawArrays(GL_TRIANGLES, 0,patrick_vertNum);
+
+    //spongebob
+
+    glUseProgram(spongebob_program);
+    identity(spongebob_transMat);
+    identity(spongebob_viewMat);
+    lookAt(spongebob_viewMat, eye, look, up);
+    perspective(spongebob_projMat,90, aspect, 0.1f, 1000.0f);
+    rotatex(spongebob_transMat, spongebob_transMat, 4.5);
+    translate(spongebob_transMat,spongebob_transMat,spongebob_translate); 
+    GLint spongebob_cameraLocation = glGetUniformLocation(spongebob_program, "camera");
+    glUniform3f(spongebob_cameraLocation,x,y,z);
+    GLint spongebob_colorLocation = glGetUniformLocation(spongebob_program, "color");
+    glUniform3f(spongebob_colorLocation, 1.0f, 0.24f, 0.02f);
+    GLint spongebob_ModelLoc = glGetUniformLocation(spongebob_program, "model");
+    glUniformMatrix4fv(spongebob_ModelLoc,1,GL_FALSE, spongebob_transMat);
+    GLint spongebob_viewLoc = glGetUniformLocation(spongebob_program, "view");
+    glUniformMatrix4fv(spongebob_viewLoc,1, GL_FALSE, spongebob_viewMat);
+    GLint spongebob_projLoc = glGetUniformLocation(spongebob_program, "projection");
+    glUniformMatrix4fv(spongebob_projLoc,1, GL_FALSE, spongebob_projMat);
+    GLint spongebob_maLocation = glGetUniformLocation(spongebob_program, "material.ambient");
+    GLint spongebob_mdLocation = glGetUniformLocation(spongebob_program, "material.diffuse");
+    GLint spongebob_msLocation = glGetUniformLocation(spongebob_program, "material.specular");
+    GLint spongebob_mshineLocation = glGetUniformLocation(spongebob_program, "material.shininess");
+    glUniform3f(spongebob_maLocation, 0.2f, 0.2f, 0.2f);
+    glUniform3f(spongebob_mdLocation, 0.8f, 0.8f, 0.8f);
+    glUniform3f(spongebob_msLocation, 0.0f, 0.0f, 0.0f);
+    glUniform1f(spongebob_mshineLocation, 64.0f);
+    GLint spongebob_laLocation = glGetUniformLocation(spongebob_program, "light.ambient");
+    GLint spongebob_ldLocation = glGetUniformLocation(spongebob_program, "light.diffuse");
+    GLint spongebob_lsLocation = glGetUniformLocation(spongebob_program, "light.specular");
+    
+    glUniform3f(spongebob_laLocation, 0.5f,0.0f,0.0f);
+    glUniform3f(spongebob_ldLocation, 0.2f,0.0f,0.0f);
+    glUniform3f(spongebob_lsLocation, 1.0f,1.0f,1.0f);
+
+    /*glActiveTexture(GL_TEXTURE12);
+    glBindTexture(GL_TEXTURE_2D, patrick);
+    GLuint patrick_Loc = glGetUniformLocation(patrick_program, "ourTexture");
+    glUniform1i(patrick_Loc,12);*/
+    glBindVertexArray(spongebobVAO);
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    //glCullFace(GL_CULL_FACE);
+    glDrawArrays(GL_TRIANGLES, 0,spongebob_vertNum);
      
     
-    if(rotAngle < 360) {
-        rotAngle += 0.01f;
-        
-    } else {
-        rotAngle = 0;
-    }
     
 }
 
@@ -597,14 +758,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     else if (key == GLFW_KEY_P && action == GLFW_REPEAT)
         look[1] = look[1] -0.5f;   
     else if (key == GLFW_KEY_UP && action == GLFW_REPEAT)
-        testvektor[1] = testvektor[1] +0.5f;
+        patrick_translate[1] = patrick_translate[1] +0.5f;
     else if (key == GLFW_KEY_DOWN && action == GLFW_REPEAT)
-        testvektor[1] = testvektor[1] -0.5f;  
+        patrick_translate[1] = patrick_translate[1] -0.5f;  
     else if (key == GLFW_KEY_RIGHT && action == GLFW_REPEAT)
-        testvektor[2] = testvektor[2] +0.5f; 
+        patrick_translate[2] = patrick_translate[2] +0.5f; 
         
     else if (key == GLFW_KEY_LEFT && action == GLFW_REPEAT)
-        testvektor[2] = testvektor[2] -0.5f; 
+        patrick_translate[2] = patrick_translate[2] -0.5f; 
 }
 int main(void)
 {
