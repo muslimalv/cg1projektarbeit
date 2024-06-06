@@ -175,9 +175,21 @@ void init(void) {
         printf("%s",infoLog);
     }
     //spongebob program
+    const char *spongebob_fragmentText = readFile("spongebobFS.glsl");
+    GLuint spongebob_fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(spongebob_fragmentShader, 1, &spongebob_fragmentText, NULL);
+    glCompileShader(spongebob_fragmentShader);
+    
+    glGetShaderiv(spongebob_fragmentShader, GL_COMPILE_STATUS, &status);
+    if(!status) {
+        printf("Error compiling fragment shader:");
+        GLchar infoLog[1024];
+        glGetShaderInfoLog(spongebob_fragmentShader, 1024, NULL, infoLog);
+        printf("%s",infoLog);
+    }
     spongebob_program = glCreateProgram();
     glAttachShader(spongebob_program, vertexShader);
-    glAttachShader(spongebob_program, patrick_fragmentShader);
+    glAttachShader(spongebob_program, spongebob_fragmentShader);
     glLinkProgram(spongebob_program);
     glGetProgramiv(spongebob_program, GL_LINK_STATUS, &status);
     if(!status) {
@@ -429,11 +441,13 @@ void init(void) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     int spongebob_width, spongebob_height, spongebob_channels;
+    
     data = stbi_load("spongebob.png", &spongebob_width, &spongebob_height, &spongebob_channels,0);
+    stbi_set_flip_vertically_on_load(1);
     glTexImage2D(
                 GL_TEXTURE_2D,
                 0,
-                GL_RGB,
+                GL_RGBA,
                 spongebob_width,
                 spongebob_height,
                 0,
