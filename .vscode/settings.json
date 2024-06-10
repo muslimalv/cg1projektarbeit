@@ -5,7 +5,8 @@
         "string": "c",
         "vector": "c",
         "glew.h": "c",
-        "stringreader.h": "c"
+        "stringreader.h": "c",
+        "cmath": "c"
     },
     "cmake.sourceDirectory": "/home/muslimaliev/CG1/glfw-3.4"
 }

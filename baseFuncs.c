@@ -13,14 +13,14 @@ void identity(GLfloat* out) {
                 out[i*4+j] = 0.0f;
             }
         }
-        
+
     }
-    
-    
+
+
 }
 
 void translate(GLfloat* out, GLfloat* in, GLfloat* v) {
-   
+
     GLfloat T[] = {
         1.0f,0.0f,0.0f,0.0f,
         0.0f,1.0f,0.0f,0.0f,
@@ -34,16 +34,16 @@ void translate(GLfloat* out, GLfloat* in, GLfloat* v) {
         {
              //out[i*4+j] = T[i*4] * in[j*4] +  T[i*4+1] * in[j*4+1] + T[i*4+2] * in[j*4+2] + T[i*4+3] * in[j*4+3];
             result[i*4+j] = T[i*4] * in[j*4] +  T[i*4+1] * in[j*4+1] + T[i*4+2] * in[j*4+2] + T[i*4+3] * in[j*4+3];
-             
-        }  
+
+        }
     }
     for (int i = 0; i < 4; i++)
     {
         for (int j = 0; j < 4; j++)
         {
             out[i*4+j] = result[i*4+j];
-             
-        }  
+
+        }
     }
 }
 
@@ -61,7 +61,7 @@ void scale(GLfloat* out, GLfloat* in, GLfloat* v) {
         {
             result[i*4+j] =S[i*4] * in[j*4] +  S[i*4+1] * in[j*4+1] + S[i*4+2] * in[j*4+2] + S[i*4+3] * in[j*4+3];
         }
-        
+
         //out[i] = S[i*4] * in[0] +  S[i*4+1] * in[1] + S[i*4+2] * in[2] + S[i*4+3] * in[3];
     }
     for (int i = 0; i < 4; i++)
@@ -69,15 +69,15 @@ void scale(GLfloat* out, GLfloat* in, GLfloat* v) {
         for (int j = 0; j < 4; j++)
         {
             out[i*4+j] = result[i*4+j];
-             
-        }  
+
+        }
     }
 }
 void rotatez(GLfloat* out, GLfloat* in, GLfloat angle) {
-   
+
     GLfloat R[] = {
-        cos(angle), sin(angle), 0.0f, 0.0f,
-        -sin(angle), cos(angle), 0.0f, 0.0f,
+        cos(angle), -sin(angle), 0.0f, 0.0f,
+        sin(angle), cos(angle), 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f
     };
@@ -94,13 +94,13 @@ void rotatez(GLfloat* out, GLfloat* in, GLfloat angle) {
         for (int j = 0; j < 4; j++)
         {
             out[i*4+j] = result[i*4+j];
-             
-        }  
+
+        }
     }
 }
 
 void rotatex(GLfloat* out, GLfloat* in, GLfloat angle) {
-   
+
     GLfloat R[] = {
         1.0f, 0.0f, 0.0f, 0.0f,
         0.0f, cos(angle), sin(angle), 0.0f,
@@ -115,20 +115,20 @@ void rotatex(GLfloat* out, GLfloat* in, GLfloat angle) {
              result[i*4+j] = R[i*4] * in[j*4] +  R[i*4+1] * in[j*4+1] + R[i*4+2] * in[j*4+2] + R[i*4+3] * in[j*4+3];
         }
         //out[i] = R[i*4] * in[0] +  R[i*4+1] * in[1] + R[i*4+2] * in[2] + R[i*4+3] * in[3];
-        
+
     }
     for (int i = 0; i < 4; i++)
     {
         for (int j = 0; j < 4; j++)
         {
             out[i*4+j] = result[i*4+j];
-             
-        }  
+
+        }
     }
 }
 
 void rotatey(GLfloat* out, GLfloat* in, GLfloat angle) {
- 
+
     GLfloat R[] = {
         cos(angle), 0.0f, -sin(angle), 0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
@@ -149,8 +149,8 @@ void rotatey(GLfloat* out, GLfloat* in, GLfloat angle) {
         for (int j = 0; j < 4; j++)
         {
             out[i*4+j] = result[i*4+j];
-             
-        }  
+
+        }
     }
 }
 
@@ -161,7 +161,7 @@ void normalize(GLfloat* out, GLfloat* in) {
     {
         out[i] = x * in[i];
     }
-    
+
 }
 
 void cross(GLfloat* out, GLfloat* a, GLfloat* b) {
@@ -201,7 +201,7 @@ void lookAt(GLfloat* out, GLfloat* eye, GLfloat* center, GLfloat* up) {
         -(vNorm[0] * eye[0] + vNorm[1] * eye[1] + vNorm[2] * eye[2]),
         -(nNorm[0] * eye[0] + nNorm[1] * eye[1] + nNorm[2] * eye[2])
     };
-    
+
 
     //Drehmatrix
     /*out[0] = uNorm[0]; out[1] = uNorm[1]; out[2] = uNorm[2]; out[3] = t[0];
@@ -222,8 +222,8 @@ void perspective(GLfloat* out, GLfloat fovy, GLfloat aspect, GLfloat near, GLflo
     float l = -r;
 
     identity(out);
-    out[0] = 2/(r -l); 
-    out[5] = 2/(t-b); 
+    out[0] = 2/(r -l);
+    out[5] = 2/(t-b);
     out[8] =  (1/near) * ((r +l)/(r-l));
     out[9] =  (1/near) * ((t+b)/(t-b));
     out[10] = - (1/near) * ((far + near)/(far - near));
@@ -237,5 +237,5 @@ void perspective(GLfloat* out, GLfloat fovy, GLfloat aspect, GLfloat near, GLflo
     out[11] = -1.0f;
     out[14] = -2*far*near /(far-near);
     out[15] =0.0f;*/
-    
+
 }
