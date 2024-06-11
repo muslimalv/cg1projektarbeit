@@ -58,5 +58,4 @@ Pfeiltaste nach links: Bewegt das Objekt nach hinten.
 Quellen:
 Haus und Untergrund - https://sketchfab.com/3d-models/spongebobs-pineapple-house-07d2dccb7ef14734868b2cab090e13e4
 Spongebob - https://sketchfab.com/3d-models/the-spongebob-squarepants-74e87e0af5b2495792d8068d561fd816
-Patrick - https://sketchfab.com/3d-models/patrick-star-spongebob-02de99ecb51c486891f6438149e7e3cd
-Von .glb zu .obj konvertiert
+Patrick - http://users.csc.calpoly.edu/~zwood/teaching/csc471/finalS19/jmtrieu/index.html
