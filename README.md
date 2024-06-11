@@ -59,3 +59,4 @@ Quellen:
 Haus und Untergrund - https://sketchfab.com/3d-models/spongebobs-pineapple-house-07d2dccb7ef14734868b2cab090e13e4
 Spongebob - https://sketchfab.com/3d-models/the-spongebob-squarepants-74e87e0af5b2495792d8068d561fd816
 Patrick - http://users.csc.calpoly.edu/~zwood/teaching/csc471/finalS19/jmtrieu/index.html
+Skybox Textur - https://www.deviantart.com/spongedrew250/art/SPSB-Background-Sky-960851679
