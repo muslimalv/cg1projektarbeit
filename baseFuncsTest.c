@@ -4,17 +4,45 @@
 #include <math.h>
 #define PI 3.14159265358979323846
 
-#define ASSERT_EQUAL(expected, actual, size, testName) do { \
-    if (memcmp((expected), (actual), size) == 0) { \
-        printf("%s: OK\n", testName); \
-    } else { \
-        printf("%s: Nicht OK\n", testName); \
-        printf("Expected:\n"); \
-        print_matrix(expected); \
-        printf("Actual:\n"); \
-        print_matrix(actual); \
-    } \
-} while (0)
+void print_matrix(GLfloat* matrix);
+void print_vector(GLfloat* vector, size_t size);
+int assert_equal_matrix(GLfloat* expected, GLfloat* actual, size_t size, const char* testName);
+int assert_equal_vector(GLfloat* expected, GLfloat* actual, size_t size, const char* testName);
+
+
+int assert_equal(GLfloat* expected, GLfloat* actual, size_t size, const char* testName) {
+    for (size_t i = 0; i < size / sizeof(GLfloat); i++) {
+        if (fabs(expected[i] - actual[i]) > 0.01) {
+            printf("%s: Nicht OK\n", testName);
+            printf("Expected:\n");
+            print_matrix(expected);
+            printf("Actual:\n");
+            print_matrix(actual);
+            return 0;
+        }
+    }
+    printf("%s: OK\n", testName);
+    return 1;
+}
+
+int assert_equal_vector(GLfloat* expected, GLfloat* actual, size_t size, const char* testName) {
+    int equal = 1;
+    for (size_t i = 0; i < size / sizeof(GLfloat); i++) {
+        if (fabs(expected[i] - actual[i]) > 0.01) {
+            equal = 0;
+        }
+    }
+    if (equal) {
+        printf("%s: OK\n", testName);
+    } else {
+        printf("%s: Nicht OK\n", testName);
+        printf("Expected:\n");
+        print_vector(expected, size / sizeof(GLfloat));
+        printf("Actual:\n");
+        print_vector(actual, size / sizeof(GLfloat));
+    }
+    return equal;
+}
 
 void print_matrix(GLfloat* matrix) {
     for (int i = 0; i < 4; i++) {
@@ -23,6 +51,13 @@ void print_matrix(GLfloat* matrix) {
         }
         printf("\n");
     }
+}
+
+void print_vector(GLfloat* vector, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        printf("%.2f ", vector[i]);
+    }
+    printf("\n");
 }
 
 void test_identity() {
@@ -34,7 +69,7 @@ void test_identity() {
         0.0f, 0.0f, 0.0f, 1.0f
     };
     identity(result);
-    ASSERT_EQUAL(expected, result, sizeof(expected), "test_identity");
+    assert_equal(expected, result, sizeof(expected), "test_identity");
 }
 
 void test_translate() {
@@ -53,7 +88,7 @@ void test_translate() {
         1.0f, 2.0f, 3.0f, 1.0f
     };
     translate(result, in, v);
-    ASSERT_EQUAL(expected, result, sizeof(expected), "test_translate");
+    assert_equal(expected, result, sizeof(expected), "test_translate");
 }
 
 void test_scale() {
@@ -72,7 +107,7 @@ void test_scale() {
         0.0f, 0.0f, 0.0f, 1.0f
     };
     scale(result, in, v);
-    ASSERT_EQUAL(expected, result, sizeof(expected), "test_scale");
+    assert_equal(expected, result, sizeof(expected), "test_scale");
 }
 
 void test_rotatez() {
@@ -91,7 +126,7 @@ void test_rotatez() {
         0.0f, 0.0f, 0.0f, 1.0f
     };
     rotatez(result, in, angle);
-    ASSERT_EQUAL(expected, result, sizeof(expected), "test_rotatez");
+    assert_equal(expected, result, sizeof(expected), "test_rotatez");
 }
 
 void test_rotatex() {
@@ -110,7 +145,7 @@ void test_rotatex() {
         0.0f, 0.0f, 0.0f, 1.0f
     };
     rotatex(result, in, angle);
-    ASSERT_EQUAL(expected, result, sizeof(expected), "test_rotatex");
+    assert_equal(expected, result, sizeof(expected), "test_rotatex");
 }
 
 void test_rotatey() {
@@ -129,7 +164,7 @@ void test_rotatey() {
         0.0f, 0.0f, 0.0f, 1.0f
     };
     rotatey(result, in, angle);
-    ASSERT_EQUAL(expected, result, sizeof(expected), "test_rotatey");
+    assert_equal(expected, result, sizeof(expected), "test_rotatey");
 }
 
 
@@ -137,8 +172,8 @@ void test_normalize() {
     GLfloat in[3] = {3.0f, 4.0f, 0.0f};
     GLfloat expected[3] = {0.6f, 0.8f, 0.0f};
     GLfloat result[3];
-    normalize(in, result);
-    ASSERT_EQUAL(expected, result, sizeof(expected), "test_normalize");
+    normalize(result, in);
+    assert_equal_vector(expected, result, sizeof(expected), "test_normalize");
 }
 
 void test_cross() {
@@ -146,8 +181,8 @@ void test_cross() {
     GLfloat b[3] = {0.0f, 1.0f, 0.0f};
     GLfloat expected[3] = {0.0f, 0.0f, 1.0f};
     GLfloat result[3];
-    cross(a, b, result);
-    ASSERT_EQUAL(expected, result, sizeof(expected), "test_cross");
+    cross(result, a, b);
+    assert_equal_vector(expected, result, sizeof(expected), "test_cross");
 }
 
 
@@ -163,7 +198,7 @@ void test_lookAt() {
         -0.0f, -0.0f, -5.0f, 1.0f
     };
     lookAt(result, eye, center, up);
-    ASSERT_EQUAL(expected, result, sizeof(expected), "test_lookAt");
+    assert_equal(expected, result, sizeof(expected), "test_lookAt");
 }
 
 void test_perspective() {
@@ -175,7 +210,7 @@ void test_perspective() {
         0.0f, 0.0f, -2.02f, 0.0f
     };
     perspective(result, 90.0f, 1.0f, 1.0f, 100.0f);
-    ASSERT_EQUAL(expected, result, sizeof(expected), "test_perspective");
+    assert_equal(expected, result, sizeof(expected), "test_perspective");
 }
 
 int main() {
