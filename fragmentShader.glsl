@@ -45,8 +45,11 @@ void main() {
 
     vec3 result = ambient + diffuse + specular;
     //fragColor = vec4(result, 1.0);
-    fragColor = vec4(vertexColor,1.0);
+    //fragColor = vec4(vertexColor,1.0);
     
     //fragColor = texture(ourTexture,tex);
     //fragColor = vec4(Normal,1.0);
+    vec4 t = vec4(result,1.0f);
+    vec4 z = vec4(vertexColor,1.0);
+    fragColor = mix(t,z, 0.5);
 }

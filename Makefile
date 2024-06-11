@@ -6,7 +6,7 @@ main: main.c StringReader.h OBJLoader.h baseFuncs.h
 	gcc -o main main.c StringReader.c OBJLoader.c baseFuncs.c -lm  $(GLEW_LIBS) $(GLFW_LIBS)  -Wall
 
 translate: translate.c
-	gcc -o translate translate.c
+	gcc -o translate translate.c -lm
 
 baseTest: baseFuncsTest.c baseFuncs.h
 	gcc -o test baseFuncsTest.c baseFuncs.c -lm

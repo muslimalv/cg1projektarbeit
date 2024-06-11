@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 
 void translate(float* out, float* in, float* v) {
     float T[] = {
@@ -36,6 +37,15 @@ void translate(float* out, float* in, float* v) {
     
 
 }
+void normalize(float* out, float* in) {
+    float x = 1/(sqrt((in[0]*in[0]) + (in[1]*in[1]) + (in[2]*in[2])));
+
+    for (int i = 0; i < 3; i++)
+    {
+        out[i] = x * in[i];
+    }
+
+}
 int main(void) {
     float out[] = {
         1.0f,0.0f,0.0f,0.0f,
@@ -44,20 +54,18 @@ int main(void) {
         0.0f,0.0f,0.0f,1.0f
     };
     float vektor[] = {
-        2,
-        2,
-        3
+        3.0f,
+        4.0f,
+        0.0f
     };
-
-    translate(out,out,vektor);
-    for (int i = 0; i < 4; i++)
+    float vOut[3];
+    normalize(vOut,vektor);
+    for (int i = 0; i < 3; i++)
     {
-        for (int j = 0; j < 4; j++)
-        {
-             printf("%f ",out[i*4+j]);    
-        }
-        printf("\n");
-        
+        printf("%f\n", vOut[i]);
     }
+    
+        
+    
     return 0;
 }
