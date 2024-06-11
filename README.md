@@ -3,13 +3,20 @@ Muslim Alaudinovic Aliev
 Aland Mohamed
 Lars Hebenbrock
 
-
-
 Szene:
 Spongebob, sein Haus und Patrick.
 
 Techniken:
--..
+- Animation der Kamera und/oder eines Objekts
+- Texturierung von mindestens einem Objekt
+- Beleuchtung der Szene
+- Matrixfunktionen zur Umsetzung der benötigten Transformationen (Verschiebung, Drehung,Skalierung, Position und Orientierung der Kamera, Perspektivprojektion, Normalenmatrix)
+-  Import von Geometriedaten aus separaten Dateien
+- sinnvolle Aufteilung des Codes auf mehrere Dateien (insb. Shader-Code in separaten
+Dateien)
+- Tests für alle Matrixfunktionen
+- einfache Benutzerinteraktion mit Kamera und/oder Objekten (z. B. über Tastatur)
+- Verwendung einer Umgebungstextur
 
 
 
