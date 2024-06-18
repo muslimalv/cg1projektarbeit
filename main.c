@@ -28,6 +28,10 @@ struct Vertex spongebob_vertices[VAL];
 struct TexCoord spongebob_uvs[VAL];
 struct Normal spongebob_normals[VAL];
 int spongebob_vertNum = 0, spongebob_uvNum = 0, spongebob_normNum = 0;
+struct Vertex bootmobil_vertices[VAL];
+struct TexCoord bootmobil_uvs[VAL];
+struct Normal bootmobil_normals[VAL];
+int bootmobil_vertNum = 0, bootmobil_uvNum = 0, bootmobil_normNum = 0;
 
 
 GLfloat transMat[16];
@@ -39,11 +43,14 @@ GLfloat patrick_projMat[16];
 GLfloat spongebob_transMat[16];
 GLfloat spongebob_viewMat[16];
 GLfloat spongebob_projMat[16];
-GLuint program, patrick_program, spongebob_program;
+GLfloat bootmobil_transMat[16];
+GLfloat bootmobil_viewMat[16];
+GLfloat bootmobil_projMat[16];
+GLuint program, patrick_program, spongebob_program, bootmobil_program;
 GLuint sbProgram;
 GLuint vao;
-GLuint pineapple, patrick, spongebob;
-GLuint skyboxVAO , patrickVAO, spongebobVAO;
+GLuint pineapple, patrick, spongebob, bootmobil;
+GLuint skyboxVAO , patrickVAO, spongebobVAO, bootmobilVAO;
 unsigned int cubemapTexture;
 GLfloat dir = 1;
 GLfloat xScale = 0.1f;
@@ -83,6 +90,12 @@ GLfloat patrick_translate[] = {
 GLfloat spongebob_translate[] = {
     8.0f,
     -2.0f,
+    2.0f
+    
+};
+GLfloat bootmobil_translate[] = {
+    10.0f,
+    0.0f,
     2.0f
     
 };
@@ -204,6 +217,26 @@ void init(void) {
         printf("Error linking patrick program:");
         GLchar infoLog[1024];
         glGetProgramInfoLog(spongebob_program, 1024, NULL, infoLog);
+        printf("%s",infoLog);
+    }
+    //bootmobil
+    bootmobil_program = glCreateProgram();
+    glAttachShader(bootmobil_program, vertexShader);
+    glAttachShader(bootmobil_program, fragmentShader);
+    glLinkProgram(bootmobil_program);
+    glGetProgramiv(bootmobil_program, GL_LINK_STATUS, &status);
+    if(!status) {
+        printf("Error linking patrick program:");
+        GLchar infoLog[1024];
+        glGetProgramInfoLog(bootmobil_program, 1024, NULL, infoLog);
+        printf("%s",infoLog);
+    }
+    glValidateProgram(bootmobil_program);
+    glGetProgramiv(bootmobil_program, GL_VALIDATE_STATUS, &status);
+    if(!status) {
+        printf("Error linking patrick program:");
+        GLchar infoLog[1024];
+        glGetProgramInfoLog(bootmobil_program, 1024, NULL, infoLog);
         printf("%s",infoLog);
     }
 
@@ -497,6 +530,75 @@ void init(void) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    //bootmobil
+
+    int bootmobil_Model = loadOBJ("Patty Wagon(OBJ).obj", bootmobil_vertices, bootmobil_uvs, bootmobil_normals, &bootmobil_vertNum, &bootmobil_uvNum, &bootmobil_normNum);
+    if(bootmobil_Model !=0)
+        perror("failed to load bootmobil");
+    
+    
+    GLuint bootmobilVBO;
+    glGenBuffers(1, &bootmobilVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, bootmobilVBO);
+    glBufferData(GL_ARRAY_BUFFER, bootmobil_vertNum * sizeof(struct Vertex), bootmobil_vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    
+    
+    GLuint bootmobilNormals;
+    glGenBuffers(1, &bootmobilNormals);
+    glBindBuffer(GL_ARRAY_BUFFER, bootmobilNormals);
+    glBufferData(GL_ARRAY_BUFFER,   bootmobil_normNum * sizeof(struct Normal), bootmobil_normals, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    GLuint bootmobiluv;
+    glGenBuffers(1, &bootmobiluv);
+    glBindBuffer(GL_ARRAY_BUFFER, bootmobiluv);
+    glBufferData(GL_ARRAY_BUFFER,   bootmobil_uvNum * sizeof(struct TexCoord), bootmobil_uvs, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //bootmobil texutre
+    
+    
+    
+
+    // create vertex array object
+    glGenVertexArrays(1, &bootmobilVAO);
+    glBindVertexArray(bootmobilVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, bootmobilVBO);
+    glVertexAttribPointer(
+        0, 
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        0,
+        0
+    );
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, bootmobilNormals);
+    glVertexAttribPointer(
+        1, 
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        0,
+        0
+    );
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, bootmobiluv);
+    glVertexAttribPointer(
+        2, 
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        0,
+        0
+    );
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
 
     //skybox
 
@@ -628,7 +730,7 @@ void draw(void) {
     glUniform3f(maLocation, 1.0f, 0.5f, 0.31f);
     glUniform3f(mdLocation, 1.0f, 0.5f, 0.31f);
     glUniform3f(msLocation, 0.5f, 0.5f, 0.5f);
-    glUniform1f(mshineLocation, 64.0f);
+    glUniform1f(mshineLocation, 32.0f);
     GLint laLocation = glGetUniformLocation(program, "light.ambient");
     GLint ldLocation = glGetUniformLocation(program, "light.diffuse");
     GLint lsLocation = glGetUniformLocation(program, "light.specular");
@@ -641,56 +743,12 @@ void draw(void) {
     
     glClear(GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
-    
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     glDrawArrays(GL_TRIANGLES, 0,vertNum);
     glBindVertexArray(0);
     
-
-    glUseProgram(patrick_program);
-    identity(patrick_transMat);
-    identity(patrick_viewMat);
-    lookAt(patrick_viewMat, eye, look, up);
-    perspective(patrick_projMat,90, aspect, 0.1f, 1000.0f);
-    //rotatey(patrick_transMat, patrick_transMat, rotAngle);
-    translate(patrick_transMat,patrick_transMat,patrick_translate); 
-    GLint patrick_cameraLocation = glGetUniformLocation(patrick_program, "camera");
-    glUniform3f(patrick_cameraLocation,x,y,z);
-    GLint patrick_colorLocation = glGetUniformLocation(patrick_program, "color");
-    glUniform3f(patrick_colorLocation, 1.0f, 0.24f, 0.02f);
-    GLint patrick_ModelLoc = glGetUniformLocation(patrick_program, "model");
-    glUniformMatrix4fv(patrick_ModelLoc,1,GL_FALSE, patrick_transMat);
-    GLint patrick_viewLoc = glGetUniformLocation(patrick_program, "view");
-    glUniformMatrix4fv(patrick_viewLoc,1, GL_FALSE, patrick_viewMat);
-    GLint patrick_projLoc = glGetUniformLocation(patrick_program, "projection");
-    glUniformMatrix4fv(patrick_projLoc,1, GL_FALSE, patrick_projMat);
-    GLint patrick_maLocation = glGetUniformLocation(patrick_program, "material.ambient");
-    GLint patrick_mdLocation = glGetUniformLocation(patrick_program, "material.diffuse");
-    GLint patrick_msLocation = glGetUniformLocation(patrick_program, "material.specular");
-    GLint patrick_mshineLocation = glGetUniformLocation(patrick_program, "material.shininess");
-    glUniform3f(patrick_maLocation, 0.2f, 0.2f, 0.2f);
-    glUniform3f(patrick_mdLocation, 0.8f, 0.8f, 0.8f);
-    glUniform3f(patrick_msLocation, 0.0f, 0.0f, 0.0f);
-    glUniform1f(patrick_mshineLocation, 64.0f);
-    GLint patrick_laLocation = glGetUniformLocation(patrick_program, "light.ambient");
-    GLint patrick_ldLocation = glGetUniformLocation(patrick_program, "light.diffuse");
-    GLint patrick_lsLocation = glGetUniformLocation(patrick_program, "light.specular");
-    
-    glUniform3f(patrick_laLocation, 0.5f,0.0f,0.0f);
-    glUniform3f(patrick_ldLocation, 0.2f,0.0f,0.0f);
-    glUniform3f(patrick_lsLocation, 1.0f,1.0f,1.0f);
-
-    glActiveTexture(GL_TEXTURE12);
-    glBindTexture(GL_TEXTURE_2D, patrick);
-    GLuint patrick_Loc = glGetUniformLocation(patrick_program, "ourTexture");
-    glUniform1i(patrick_Loc,12);
-    glBindVertexArray(patrickVAO);
-
-    glClear(GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-    //glCullFace(GL_CULL_FACE);
-    glDrawArrays(GL_TRIANGLES, 0,patrick_vertNum);
-
-    //spongebob
+//spongebob
 
     glUseProgram(spongebob_program);
     identity(spongebob_transMat);
@@ -733,9 +791,105 @@ void draw(void) {
 
     glClear(GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     //glCullFace(GL_CULL_FACE);
     glDrawArrays(GL_TRIANGLES, 0,spongebob_vertNum);
-     
+
+    //patrick
+    glUseProgram(patrick_program);
+    identity(patrick_transMat);
+    identity(patrick_viewMat);
+    lookAt(patrick_viewMat, eye, look, up);
+    perspective(patrick_projMat,90, aspect, 0.1f, 1000.0f);
+    //rotatey(patrick_transMat, patrick_transMat, rotAngle);
+    translate(patrick_transMat,patrick_transMat,patrick_translate); 
+    GLint patrick_cameraLocation = glGetUniformLocation(patrick_program, "camera");
+    glUniform3f(patrick_cameraLocation,x,y,z);
+    GLint patrick_colorLocation = glGetUniformLocation(patrick_program, "color");
+    glUniform3f(patrick_colorLocation, 1.0f, 0.24f, 0.02f);
+    GLint patrick_ModelLoc = glGetUniformLocation(patrick_program, "model");
+    glUniformMatrix4fv(patrick_ModelLoc,1,GL_FALSE, patrick_transMat);
+    GLint patrick_viewLoc = glGetUniformLocation(patrick_program, "view");
+    glUniformMatrix4fv(patrick_viewLoc,1, GL_FALSE, patrick_viewMat);
+    GLint patrick_projLoc = glGetUniformLocation(patrick_program, "projection");
+    glUniformMatrix4fv(patrick_projLoc,1, GL_FALSE, patrick_projMat);
+    GLint patrick_maLocation = glGetUniformLocation(patrick_program, "material.ambient");
+    GLint patrick_mdLocation = glGetUniformLocation(patrick_program, "material.diffuse");
+    GLint patrick_msLocation = glGetUniformLocation(patrick_program, "material.specular");
+    GLint patrick_mshineLocation = glGetUniformLocation(patrick_program, "material.shininess");
+    glUniform3f(patrick_maLocation, 0.2f, 0.2f, 0.2f);
+    glUniform3f(patrick_mdLocation, 0.8f, 0.8f, 0.8f);
+    glUniform3f(patrick_msLocation, 0.0f, 0.0f, 0.0f);
+    glUniform1f(patrick_mshineLocation, 64.0f);
+    GLint patrick_laLocation = glGetUniformLocation(patrick_program, "light.ambient");
+    GLint patrick_ldLocation = glGetUniformLocation(patrick_program, "light.diffuse");
+    GLint patrick_lsLocation = glGetUniformLocation(patrick_program, "light.specular");
+    
+    glUniform3f(patrick_laLocation, 0.5f,0.0f,0.0f);
+    glUniform3f(patrick_ldLocation, 0.2f,0.0f,0.0f);
+    glUniform3f(patrick_lsLocation, 1.0f,1.0f,1.0f);
+
+    glActiveTexture(GL_TEXTURE12);
+    glBindTexture(GL_TEXTURE_2D, patrick);
+    GLuint patrick_Loc = glGetUniformLocation(patrick_program, "ourTexture");
+    glUniform1i(patrick_Loc,12);
+    glBindVertexArray(patrickVAO);
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+
+    glDrawArrays(GL_TRIANGLES, 0,patrick_vertNum);
+    glDisable(GL_CULL_FACE);
+    //bootmobil
+    glUseProgram(bootmobil_program);
+    identity(bootmobil_transMat);
+    
+    identity(bootmobil_viewMat);
+
+    lookAt(bootmobil_viewMat, eye, look, up);
+    perspective(bootmobil_projMat,90, aspect, 0.1f, 1000.0f);
+    rotatey(bootmobil_transMat, bootmobil_transMat, rotAngle);
+    translate(bootmobil_transMat,bootmobil_transMat,bootmobil_translate); 
+    GLint bootmobil_cameraLocation = glGetUniformLocation(bootmobil_program, "camera");
+    glUniform3f(bootmobil_cameraLocation,x,y,z);
+    GLint bootmobil_colorLocation = glGetUniformLocation(bootmobil_program, "color");
+    glUniform3f(bootmobil_colorLocation, 1.0f, 0.24f, 0.02f);
+    GLint bootmobil_ModelLoc = glGetUniformLocation(bootmobil_program, "model");
+    glUniformMatrix4fv(bootmobil_ModelLoc,1,GL_FALSE, bootmobil_transMat);
+    GLint bootmobil_viewLoc = glGetUniformLocation(bootmobil_program, "view");
+    glUniformMatrix4fv(bootmobil_viewLoc,1, GL_FALSE, bootmobil_viewMat);
+    GLint bootmobil_projLoc = glGetUniformLocation(bootmobil_program, "projection");
+    glUniformMatrix4fv(bootmobil_projLoc,1, GL_FALSE, bootmobil_projMat);
+    GLint bootmobil_maLocation = glGetUniformLocation(bootmobil_program, "material.ambient");
+    GLint bootmobil_mdLocation = glGetUniformLocation(bootmobil_program, "material.diffuse");
+    GLint bootmobil_msLocation = glGetUniformLocation(bootmobil_program, "material.specular");
+    GLint bootmobil_mshineLocation = glGetUniformLocation(bootmobil_program, "material.shininess");
+    glUniform3f(bootmobil_maLocation, 0.2f, 0.2f, 0.2f);
+    glUniform3f(bootmobil_mdLocation, 0.8f, 0.8f, 0.8f);
+    glUniform3f(bootmobil_msLocation, 0.0f, 0.0f, 0.0f);
+    glUniform1f(bootmobil_mshineLocation, 64.0f);
+    GLint bootmobil_laLocation = glGetUniformLocation(bootmobil_program, "light.ambient");
+    GLint bootmobil_ldLocation = glGetUniformLocation(bootmobil_program, "light.diffuse");
+    GLint bootmobil_lsLocation = glGetUniformLocation(bootmobil_program, "light.specular");
+    
+    glUniform3f(bootmobil_laLocation, 0.5f,0.0f,0.0f);
+    glUniform3f(bootmobil_ldLocation, 0.2f,0.0f,0.0f);
+    glUniform3f(bootmobil_lsLocation, 1.0f,1.0f,1.0f);
+
+    
+    glBindVertexArray(bootmobilVAO);
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+
+    glDrawArrays(GL_TRIANGLES, 0,bootmobil_vertNum);
+    
+     if(rotAngle <360) {
+        rotAngle += 0.01f;
+     } else {
+        rotAngle = 0;
+     }
     
     
 }
